@@ -1,291 +1,111 @@
 # align v2
 
-复杂多轮协作守卫。
-
+复杂多轮 AI 协作守卫。  
 Lightweight guardrails for complex multi-turn AI collaboration.
 
-`align v2` 是一套给 AI 协作使用的轻量规则，专门解决复杂、多轮、易漂移任务中的几个常见问题：
+## What It Is / 它是什么
 
-- 聊着聊着，目标变了
-- AI 把假设写成结论
-- AI 把自己的理解冒充成你的原意
-- 新信息已经推翻旧结论，但前文没人回查
-- 重要状态只留在聊天里，开个新窗口就断档
+`align v2` 是一套轻量规则，用来减少复杂协作中的漂移、偷换和断档。  
+`align v2` is a lightweight rule set for reducing drift, silent reinterpretation, and context loss in complex collaboration.
 
-它不是任务管理器，不是 agent 框架，也不是通用 prompt 模板。
-它更像一个 guardrail：在不把流程做重的前提下，稳住协作质量。
+它不是任务管理器，不是 agent 框架，也不是通用 prompt 模板。  
+It is not a task manager, not an agent framework, and not a generic prompt template.
 
-## 中文简介
+它更像一个 guardrail：默认轻量，必要时展开。  
+It is closer to a guardrail: light by default, expandable when needed.
 
-`align v2` 是一个给 AI 协作用的轻量守卫层。
+## What It Protects / 它防什么
 
-它不是为了让 AI 说更多话，也不是为了把流程做得更重，而是为了减少复杂协作中最常见的几种失真：
+- 把假设写成结论 / turning assumptions into conclusions
+- 把改写版当成用户原意 / treating rewritten wording as user intent
+- 长对话后目标和约束漂移 / goal and constraint drift across long conversations
+- 重要状态只留在聊天里 / leaving important state only in chat memory
+- 新信息改变旧结论却没人回查 / failing to revisit old conclusions after new information
 
-- 把假设写成结论
-- 把改写版当成用户原意
-- 长对话后目标和约束漂移
-- 重要状态只留在聊天里，后续无法稳定继承
-- 新信息已经影响旧结论，但没人回查
+## Core Rules / 核心规则
 
-它的核心思路是：
+1. 区分 `已确认 / 暂定假设 / 待确认`  
+   Keep `confirmed / temporary assumptions / needs confirmation` separate.
 
-- 默认轻量使用
-- 必要时外化高影响状态
-- 复杂场景再展开，而不是一开始就上重型流程
+2. 不擅自把 agent 改写版沉淀成既定事实  
+   Do not silently turn the assistant's rewrite into durable accepted state.
 
-## English Summary
+3. 高影响内容在必要时外化  
+   Externalize high-impact state when later work depends on it.
 
-`align v2` is a lightweight guardrail layer for AI collaboration.
+4. 新信息影响旧内容时必须联查  
+   Revisit earlier conclusions when new information changes them.
 
-It is designed for complex, multi-turn work where drift, hidden assumptions, and silent reinterpretation can easily break the collaboration.
+5. 目标和约束足够稳定后再执行  
+   Move into execution only when goals and constraints are stable enough.
 
-It focuses on a few practical protections:
+## Quick Start / 快速开始
 
-- keep confirmed facts, temporary assumptions, and unconfirmed items separate
-- avoid silently rewriting user intent into durable state
-- externalize high-impact state when later work depends on it
-- revisit older conclusions when new information changes them
-- keep progress moving without forcing heavy process on simple tasks
+1. 先说清当前任务。  
+   State the current task clearly.
 
-## Quick Start
+2. 让 AI 分出四类内容：  
+   Ask the assistant to separate:
+   - `confirmed`
+   - `temporary assumptions`
+   - `needs confirmation`
+   - `out of scope for this step`
 
-You can start using `align v2` in under a minute.
+3. 如果后续还要依赖，就只外化最小状态层：  
+   If later work will depend on it, externalize only the minimum state layer:
+   - `current-goal`
+   - `confirmed-constraints`
+   - `pending-items`
+   - `decisions`
 
-### 1. Tell the assistant the current task
+4. 当前步够清楚时，交付最小有用结果。  
+   Once the current step is clear enough, deliver the smallest useful result.
 
-Example:
+## Who It Is For / 适用场景
 
-> We are designing the approach first. Do not start implementation yet.
+- 长对话协作 / long multi-turn collaboration
+- 框架、方法、系统设计 / framework, method, or system design
+- 会跨阶段推进的任务 / work that spans stages or sessions
+- 对定义、边界、约束、决策很敏感的任务 / tasks sensitive to wording, boundaries, constraints, and decisions
 
-### 2. Ask it to separate the current state
+## Not For / 不太适合
 
-Use this structure:
+- 一次性小任务 / one-shot small tasks
+- 简单问答 / simple Q&A
+- 不需要承接状态的快速修改 / quick edits with no state carryover
 
-- `confirmed`
-- `temporary assumptions`
-- `needs confirmation`
-- `out of scope for this step`
+## Minimal State / 最小状态层
 
-### 3. Externalize only what later work will depend on
-
-If the task will continue across multiple rounds, capture only the minimum high-impact state:
+这不是完整备份，只是继续协作时最小够用的状态。  
+This is not a full transcript, only the minimum state needed for continuation.
 
 - `current-goal`
 - `confirmed-constraints`
 - `pending-items`
 - `decisions`
 
-### 4. Move forward with the smallest useful result
-
-Once the goal and constraints are stable enough, use the smallest next deliverable instead of over-planning.
-
-## Who Is This For
-
-`align v2` is for people who regularly work with AI on tasks that are:
-
-- multi-turn
-- easy to drift
-- full of implicit assumptions
-- likely to cross stages or sessions
-- dependent on stable goals, constraints, and decisions
-
-Good fits include:
-
-- long design discussions
-- framework or method design
-- system and tool planning
-- research and analysis that evolves over time
-- projects where wording, boundaries, and decisions really matter
-
-## Who This Is Not For
-
-`align v2` is probably unnecessary if you mostly do:
-
-- one-shot prompts
-- simple Q&A
-- quick code edits with no state carryover
-- tasks where you do not need to preserve decisions across rounds
-
-If your work is already well-covered by a simple `AGENTS.md` file and does not drift much, that may be enough.
-
-## 它适合什么场景
-
-`align v2` 适合：
-
-- 长对话协作
-- 复杂问题讨论
-- 框架和方法设计
-- 工具或系统构建
-- 会跨多轮、跨阶段推进的任务
-- 需要反复确认定义、边界、约束和决策的工作
-
-它不太适合：
-
-- 一次性小任务
-- 简单问答
-- 不需要承接状态的短对话
-
-## 它解决什么问题
-
-很多 AI 协作问题，不是模型“不聪明”，而是协作过程失真了。
-
-`align v2` 重点防这几种失真：
-
-1. 状态失真
-   - `已确认`
-   - `暂定假设`
-   - `待确认`
-
-   这三种信息一旦混在一起，后面几轮基本一定会出事。
-
-2. 语义失真
-   AI 经常会把自己的“整理版”当成你的“原意”继续往下建。
-
-3. 记忆失真
-   重要内容只存在于自然对话里，后续协作只能靠模糊记忆继承。
-
-4. 一致性失真
-   新信息已经改变了旧结论，但系统只改当前局部，不回查整体。
-
-5. 推进失真
-   要么还没对齐就直接硬推执行，要么为了求稳无限不推进。
-
-## 核心设计
-
-`align v2` 的设计目标不是“最完整”，而是“默认轻量，复杂时展开”。
-
-它保留了 5 个核心能力：
-
-- 区分 `已确认 / 暂定假设 / 待确认`
-- 不擅自改写用户语义并沉淀
-- 高影响内容必要时外化
-- 新信息影响旧内容时必须联查
-- 目标和约束足够稳定后再执行
-
-这意味着：
-
-- 简单任务时，不需要上重型流程
-- 复杂任务时，也不会因为没有状态承接而失控
-
-## 和常见方案有什么不同
-
-### 和普通 prompt 模板的区别
-
-普通 prompt 模板更关注“怎么让模型回答得更好”。
-
-`align v2` 更关注：
-- 怎么让复杂协作不失真
-- 怎么让状态能继续继承
-- 怎么防止建议被偷换成结论
-
-### 和 AGENTS.md 的区别
-
-`AGENTS.md` 更像项目协作入口，告诉 agent 这个仓库该怎么做事。
-
-`align v2` 更像协作守卫，重点处理：
-- 信息状态
-- 语义保真
-- 状态外化
-- 一致性回查
-
-两者不是替代关系，更适合一起用：
-
-- `AGENTS.md` 做项目协作底座
-- `align v2` 做复杂协作 guardrail
-
-### 和任务管理 / agent 框架的区别
-
-像任务系统、工作流框架、更偏向：
-- 拆任务
-- 排顺序
-- 调工具
-- 编排执行
-
-`align v2` 不负责这些主能力。
-它负责的是：在这些动作发生之前和过程中，防止协作本身跑偏。
-
-## 最小使用方式
-
-默认只做这几件事：
-
-1. 先说清现在真正要解决的问题
-2. 区分：
-   - 已确认
-   - 暂定假设
-   - 待确认
-3. 如果某条信息后面还会反复依赖，就把它单独记下来
-4. 新信息改变旧判断时，回查旧内容
-5. 当前步已经够清楚时，交付最小有用结果
-
-## 外化原则
-
-`align v2` 不要求把所有对话都记下来。
-
-它只建议在必要时外化高影响状态，最小结构是：
-
-- `current-goal`
-- `confirmed-constraints`
-- `pending-items`
-- `decisions`
-
-这不是完整备份，而是继续协作时的最小状态层。
-
-## 为什么是 v2
-
-`align v2` 不是凭空来的。
-
-它建立在更完整的协作理论整理之上，但没有把完整系统直接搬进日常使用层。
-它保留了复杂协作中最关键的能力，同时尽量减少默认使用负担。
-
-简单说：
-
-- 更轻，适合日常使用
-- 不丢核心能力
-- 遇到复杂场景还能展开
-
-## 仓库结构
-
-- `SKILL.md`
-  - 主规则文件，只保留最高频、最高价值规则
-- `references/workflow.md`
-  - 复杂协作时的展开流程
-- `references/checklist.md`
-  - 使用前后可快速检查的清单
-- `references/update-rules.md`
-  - 如何更新这套规则，而不是悄悄污染它
-
-## 一个简单例子
-
-用户说：
-
-> 我想做个方案，先别写代码，但你可以顺手把结构也想好。
-
-如果没有 guardrail，AI 很容易直接把“先别写代码”偷换成“已经确定方案结构”，然后一路往下扩写。
-
-`align v2` 的处理方式会更稳：
-
-- 当前真正问题：先收束方案，不进入实现
-- 已确认：当前轮先不写代码
-- 暂定假设：可能需要先给出一个结构化方案
-- 待确认：方案结构是否就是后续正式结构
-- 当前不处理：具体实现细节
-
-这样后续推进时，状态不会悄悄升级。
-
-## 使用建议
-
-如果你只是做普通代码协作，可以单独使用 `AGENTS.md`。
-
-如果你经常做：
-- 多轮设计
-- 长链路分析
-- 复杂决策
-- 长期协作
-
-那 `align v2` 会更有价值。
-
-## 状态
-
-这是一个强调“好用优先”的版本。
-
-它不是一个大而全框架，而是一个可嵌入、更适合长期迭代的协作守卫层。
+## Repo Structure / 仓库结构
+
+- `SKILL.md`: 主规则 / main rules
+- `references/workflow.md`: 展开流程 / expanded workflow
+- `references/checklist.md`: 检查清单 / checklist
+- `references/update-rules.md`: 更新规则 / rule update policy
+- `examples/`: 简单示例 / simple examples
+
+## Example / 示例
+
+用户说：先做方案，不要开始实现。  
+User says: design the approach first, do not start implementation.
+
+`align v2` 会先区分：  
+`align v2` first separates:
+
+- 已确认：当前轮不进入实现  
+  Confirmed: do not implement in this round
+- 暂定假设：先给一个结构化方案可能有帮助  
+  Temporary assumption: a structured outline may help
+- 待确认：这个结构是否会成为正式结构  
+  Needs confirmation: whether this structure should become official
+
+这样后续不会把暂定结构悄悄升级成既定事实。  
+This prevents temporary structure from being silently upgraded into settled fact.
