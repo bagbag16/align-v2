@@ -4,14 +4,14 @@
 
 I want to design a tool first. Do not start coding yet, but you can think through the structure.
 
-## Without align v2
+## Without agent-drift-guard
 
 An assistant may silently do all of these:
 - treat the structure as already approved
 - move directly into implementation planning
 - forget that "do not code yet" was a confirmed constraint
 
-## With align v2
+## With agent-drift-guard
 
 The assistant should separate:
 

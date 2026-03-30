@@ -1,5 +1,6 @@
 ---
-name: align-v2
+name: agent-drift-guard
+alias: adg
 description: 复杂多轮协作守卫。默认轻量使用；当任务跨多轮、易漂移、会积累高影响状态时，展开最小外化与一致性校验，稳住协作同时保持推进。
 ---
 
